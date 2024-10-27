@@ -3,16 +3,20 @@ package org.matg0mes.utils;
 import dev.openfeature.contrib.providers.unleash.UnleashProvider;
 import dev.openfeature.contrib.providers.unleash.UnleashProviderConfig;
 import dev.openfeature.sdk.Client;
-import dev.openfeature.sdk.FeatureProvider;
 import dev.openfeature.sdk.OpenFeatureAPI;
 import io.getunleash.util.UnleashConfig;
+import io.quarkus.runtime.Shutdown;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.net.URISyntaxException;
 import java.util.Objects;
+import java.util.UUID;
 
-@ApplicationScoped
+
+@Singleton
 public class FeatureFlagConfig {
     @ConfigProperty(name = "open-feature.unleash.url")
     private String unleashUrl;
@@ -25,16 +29,17 @@ public class FeatureFlagConfig {
     private Client unleashClient;
 
     public Client getUnleashClient() throws URISyntaxException {
-        if (Objects.nonNull(unleashClient)) {
-            return unleashClient;
-        }
+        return OpenFeatureAPI.getInstance().getClient("sync");
+    }
 
+    @Startup
+    void startup() {
         UnleashConfig.Builder unleashConfigBuilder =
                 UnleashConfig.builder()
                         .appName("quarkus-example")
-                        .instanceId("quarkus-example")
                         .apiKey(unleashApiKey)
                         .unleashAPI(unleashUrl)
+                        .instanceId("quarkus-example-" + UUID.randomUUID())
                         .synchronousFetchOnInitialisation(true);
 
         UnleashProviderConfig unleashProviderConfig = UnleashProviderConfig.builder()
@@ -42,8 +47,11 @@ public class FeatureFlagConfig {
                 .build();
 
         OpenFeatureAPI.getInstance().setProviderAndWait("sync", new UnleashProvider(unleashProviderConfig));
-        unleashClient = OpenFeatureAPI.getInstance().getClient("sync");
-        return unleashClient;
+    }
+
+    @Shutdown
+    void shutdown() {
+        OpenFeatureAPI.getInstance().shutdown();
     }
 
 }

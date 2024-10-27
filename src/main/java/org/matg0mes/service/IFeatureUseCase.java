@@ -6,4 +6,6 @@ public interface IFeatureUseCase {
 
     String execute();
 
+    String executeWithContext(String type);
+
 }

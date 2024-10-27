@@ -4,10 +4,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import org.matg0mes.service.IFeatureUseCase;
 
-@Path("/hello")
+@Path("/potato")
 public class FeatureResource {
 
     @Inject
@@ -15,8 +16,15 @@ public class FeatureResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String hello() {
+    public String potato() {
         return iFeatureUseCase.execute();
+    }
+
+    @GET
+    @Path("/with-context")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String potatoWithContext(@QueryParam(value = "type") String type) {
+        return iFeatureUseCase.executeWithContext(type);
     }
 
 }
