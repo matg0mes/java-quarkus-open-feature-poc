@@ -1,6 +1,6 @@
 ## O que é Open Feature?
 
-Open Feature é uma especificação que inverte dependências de providers de **Feature Flags** para que eles sejam utilizados por uma interface "plugável". Assim conseguimos resolver problemas de **[[Vendors]] Lock-In**. Assim como o [[Open Telemetry]] ele conta com um [marketplace](https://openfeature.dev/ecosystem) com suporte para vários providers e linguagens de programação.
+Open Feature é uma especificação que inverte dependências de providers de **Feature Flags** para que eles sejam utilizados por uma interface "plugável". Assim conseguimos resolver problemas de **Vendors Lock-In**. Assim como o Open Telemetry ele conta com um marketplace(https://openfeature.dev/ecosystem) com suporte para vários providers e linguagens de programação.
 
 ## Providers de Open Feature
 
