@@ -1,86 +1,68 @@
-# code-with-quarkus
+## O que é Open Feature?
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Open Feature é uma especificação que inverte dependências de providers de **Feature Flags** para que eles sejam utilizados por uma interface "plugável". Assim conseguimos resolver problemas de **[[Vendors]] Lock-In**. Assim como o [[Open Telemetry]] ele conta com um [marketplace](https://openfeature.dev/ecosystem) com suporte para vários providers e linguagens de programação.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Providers de Open Feature
 
-## Running the application in dev mode
+- [Unleash](https://www.getunleash.io/)
+- [Flipt](https://www.flipt.io/)
 
-You can run your application in dev mode that enables live coding using:
+# POC do Open Feature
 
-```shell script
-./mvnw compile quarkus:dev
+Foi realizado uma POC (Proof of Concept) entendendo como implementar o Open Feature. Nele foi utilizado o provider [Unleash](https://www.getunleash.io/) junto de um client com Java Quarkus.
+## Quick Start
+
+Utilize o comando **docker-compose up** na pasta raiz do projeto. Na porta http://localhost:4242 você poderá acessar a plataforma do Unleash.
+
+<div  align="center">
+<img src="https://i.imgur.com/lF1YcY6.png"  />
+</div>
+
+>  Acesso ao Unleash a senha padrão de acesso é: Login - **admin** | Senha - **unleash4all**
+
+Uma vez na plataforma, crie uma **chave de api** e coloque-a nas suas variáveis de ambiente com o nome **UNLEASH_API_KEY**:
+
+<div  align="center">
+<img src="https://i.imgur.com/AD4L3Wk.png"  />
+</div>
+
+Logo após, crie uma Feature Flag. Estamos usando o nome **is-a-potato** para essa POC:
+
+<div  align="center">
+<img src="https://i.imgur.com/n7Bl3BB.png" />
+</div>
+
+Uma vez criada a flag a aplicação precisa chamar a classe **FeatureFlagConfig** passando o nome da flag como parâmetro em método **getBooleanValue**. Snippet da classe:
+
+```java
+@ApplicationScoped  
+public class FeatureUseCase implements IFeatureUseCase {  
+    private static final String FLAG_NAME_POTATO = "is-a-potato";  
+  
+    @Inject  
+    FeatureFlagConfig featureFlagConfig;  
+  
+    public String execute() {  
+        try {  
+            Client client = featureFlagConfig.getUnleashClient();  
+            Boolean featureEnabled = client.getBooleanValue(FLAG_NAME_POTATO, false);  
+  
+            return "Potato is: " + featureEnabled;  
+        } catch (URISyntaxException e) {  
+            throw new RuntimeException(e);  
+        }  
+    }  
+  
+}
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+### Constraints
 
-## Packaging and running the application
+Constraints são campos cujo é possível parametrizar valores que serão permitidos para aquela feature ser **verdadeira**.
 
-The application can be packaged using:
+<div  align="center">
+<img src="https://i.imgur.com/eWjAj4j.png"  />
+</div>
 
-```shell script
-./mvnw package
-```
+> Não somente a feature está habilitada como o valor **potato-type** precisa ser "gratinada" ou "frita" para devolver **true** 
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/code-with-quarkus-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Document your REST APIs with OpenAPI - comes with Swagger UI
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- Jacoco - Code Coverage ([guide](https://quarkus.io/guides/tests-with-coverage)): Jacoco test coverage support
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
-
-## Provided Code
-
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
-
-### SmallRye Health
-
-Monitor your application's health using SmallRye Health
-
-[Related guide section...](https://quarkus.io/guides/smallrye-health)
